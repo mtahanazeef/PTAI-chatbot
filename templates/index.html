@@ -1,0 +1,1361 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>PTAI Assistant PK</title>
+    <script src="https://unpkg.com/@phosphor-icons/web"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600;9..144,700&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap"
+      rel="stylesheet"
+    />
+
+    <style>
+      /* =========================================================
+         TOKENS
+      ========================================================= */
+      :root {
+        --ink: #1b1f3b;
+        --ink-2: #242a4d;
+        --ink-3: #2d345e;
+        --saffron: #e8a33d;
+        --terracotta: #c4592f;
+        --teal: #2f9b8f;
+        --sand: #f3e9d8;
+        --text-primary: #f3ecdf;
+        --text-secondary: #b9b6c9;
+        --border-color: #363c63;
+        --danger: #d9667b;
+        --radius: 14px;
+        --serif: "Fraunces", serif;
+        --sans: "Inter", sans-serif;
+        --mono: "JetBrains Mono", monospace;
+      }
+
+      [data-theme="light"] {
+        --ink: #f3e9d8;
+        --ink-2: #ffffff;
+        --ink-3: #fbf5ea;
+        --text-primary: #1b1f3b;
+        --text-secondary: #6b6258;
+        --border-color: #e3d6bc;
+      }
+
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+      body {
+        font-family: var(--sans);
+        background-color: var(--ink);
+        color: var(--text-primary);
+        height: 100vh;
+        display: flex;
+        overflow: hidden;
+        transition:
+          background-color 0.25s ease,
+          color 0.25s ease;
+      }
+      .section-hidden {
+        display: none !important;
+      }
+      ::selection {
+        background: var(--saffron);
+        color: var(--ink);
+      }
+
+      /* Truck-art scallop border strip — signature element */
+      .scallop {
+        height: 6px;
+        width: 100%;
+        background-image: repeating-linear-gradient(
+          -45deg,
+          var(--saffron) 0px,
+          var(--saffron) 6px,
+          var(--terracotta) 6px,
+          var(--terracotta) 12px
+        );
+        flex-shrink: 0;
+      }
+
+      /* =========================================================
+         SIDEBAR
+      ========================================================= */
+      .sidebar {
+        width: 88px;
+        background-color: var(--ink-2);
+        border-right: 1px solid var(--border-color);
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        padding: 22px 0;
+        gap: 8px;
+        flex-shrink: 0;
+      }
+      .sidebar-logo {
+        width: 44px;
+        height: 44px;
+        border-radius: 12px;
+        background: linear-gradient(135deg, var(--saffron), var(--terracotta));
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 22px;
+        color: var(--ink);
+        margin-bottom: 18px;
+      }
+      .nav-item {
+        width: 56px;
+        height: 56px;
+        border-radius: 12px;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        gap: 4px;
+        color: var(--text-secondary);
+        cursor: pointer;
+        font-size: 1.3rem;
+        transition: all 0.18s ease;
+      }
+      .nav-item span {
+        font-size: 0.62rem;
+        font-weight: 600;
+        letter-spacing: 0.02em;
+      }
+      .nav-item:hover {
+        background-color: var(--ink-3);
+        color: var(--text-primary);
+      }
+      .nav-item.active {
+        background-color: rgba(232, 163, 61, 0.15);
+        color: var(--saffron);
+      }
+      .sidebar-bottom {
+        margin-top: auto;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 10px;
+      }
+      .theme-toggle {
+        background: none;
+        border: 1px solid var(--border-color);
+        color: var(--text-primary);
+        width: 42px;
+        height: 42px;
+        border-radius: 10px;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.1rem;
+      }
+      .theme-toggle:hover {
+        border-color: var(--saffron);
+        color: var(--saffron);
+      }
+
+      /* =========================================================
+         APP SHELL
+      ========================================================= */
+      .app-shell {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        overflow: hidden;
+      }
+      .topbar {
+        padding: 18px 30px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+      }
+      .topbar-title {
+        font-family: var(--serif);
+        font-size: 1.5rem;
+        font-weight: 600;
+      }
+      .topbar-sub {
+        font-size: 0.82rem;
+        color: var(--text-secondary);
+        margin-top: 2px;
+      }
+      .status-pill {
+        background-color: rgba(47, 155, 143, 0.16);
+        color: var(--teal);
+        padding: 6px 14px;
+        border-radius: 30px;
+        font-size: 0.8rem;
+        font-weight: 600;
+        display: flex;
+        align-items: center;
+        gap: 7px;
+      }
+      .status-dot {
+        width: 7px;
+        height: 7px;
+        background-color: var(--teal);
+        border-radius: 50%;
+        box-shadow: 0 0 0 3px rgba(47, 155, 143, 0.2);
+      }
+
+      .account-area {
+        position: relative;
+        margin-left: 14px;
+      }
+      .account-btn {
+        background-color: var(--ink-3);
+        border: 1px solid var(--border-color);
+        color: var(--text-primary);
+        padding: 9px 16px;
+        border-radius: 10px;
+        cursor: pointer;
+        font-weight: 600;
+        font-size: 0.85rem;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+      }
+      .account-btn:hover {
+        border-color: var(--saffron);
+      }
+      .account-menu {
+        position: absolute;
+        right: 0;
+        top: 48px;
+        background-color: var(--ink-2);
+        border: 1px solid var(--border-color);
+        border-radius: 12px;
+        min-width: 200px;
+        padding: 8px;
+        display: none;
+        box-shadow: 0 12px 28px rgba(0, 0, 0, 0.3);
+        z-index: 50;
+      }
+      .account-menu.open {
+        display: block;
+      }
+      .account-menu-item {
+        padding: 10px 12px;
+        border-radius: 8px;
+        cursor: pointer;
+        font-size: 0.88rem;
+        display: flex;
+        align-items: center;
+        gap: 9px;
+      }
+      .account-menu-item:hover {
+        background-color: var(--ink-3);
+      }
+      .topbar-right {
+        display: flex;
+        align-items: center;
+      }
+
+      .main-container {
+        flex: 1;
+        overflow: hidden;
+        position: relative;
+        padding: 0 30px 24px;
+        display: flex;
+        flex-direction: column;
+      }
+
+      /* =========================================================
+         CHAT
+      ========================================================= */
+      #chat-section {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        overflow: hidden;
+        height: 100%;
+      }
+      .welcome-box {
+        background: linear-gradient(135deg, var(--ink-2), var(--ink-3));
+        padding: 26px 28px;
+        border-radius: var(--radius);
+        margin-bottom: 18px;
+        border: 1px solid var(--border-color);
+        position: relative;
+        overflow: hidden;
+      }
+      .welcome-box::before {
+        content: "";
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 4px;
+        background-image: repeating-linear-gradient(
+          -45deg,
+          var(--saffron) 0px,
+          var(--saffron) 6px,
+          var(--terracotta) 6px,
+          var(--terracotta) 12px
+        );
+      }
+      .welcome-header {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        font-family: var(--serif);
+        font-weight: 600;
+        font-size: 1.3rem;
+        margin-bottom: 6px;
+      }
+      .welcome-header i {
+        color: var(--saffron);
+      }
+      .welcome-sub {
+        color: var(--text-secondary);
+        font-size: 0.92rem;
+        margin-bottom: 16px;
+      }
+      .capabilities-list {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 10px;
+        font-size: 0.88rem;
+      }
+      .capability-item {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        color: var(--text-secondary);
+      }
+      .capability-item i {
+        color: var(--teal);
+      }
+
+      .chat-history {
+        flex: 1;
+        overflow-y: auto;
+        display: flex;
+        flex-direction: column;
+        gap: 14px;
+        padding-right: 8px;
+      }
+      .chat-history::-webkit-scrollbar {
+        width: 6px;
+      }
+      .chat-history::-webkit-scrollbar-thumb {
+        background: var(--ink-3);
+        border-radius: 4px;
+      }
+      .message {
+        max-width: 72%;
+        padding: 13px 18px;
+        border-radius: 16px;
+        line-height: 1.55;
+        font-size: 0.95rem;
+        animation: rise 0.25s ease;
+      }
+      @keyframes rise {
+        from {
+          opacity: 0;
+          transform: translateY(8px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+      .bot-message {
+        background-color: var(--ink-2);
+        border: 1px solid var(--border-color);
+        align-self: flex-start;
+        border-bottom-left-radius: 4px;
+      }
+      .user-message {
+        background: linear-gradient(135deg, var(--terracotta), var(--saffron));
+        color: #1b1f3b;
+        font-weight: 500;
+        align-self: flex-end;
+        border-bottom-right-radius: 4px;
+      }
+      .typing-indicator {
+        color: var(--text-secondary);
+        font-style: italic;
+        font-size: 0.88rem;
+        align-self: flex-start;
+        padding-left: 16px;
+        display: none;
+        margin-top: 8px;
+      }
+
+      /* =========================================================
+         DASHBOARD (weather / history sections)
+      ========================================================= */
+      .dashboard-container {
+        overflow-y: auto;
+        height: 100%;
+        padding-top: 4px;
+      }
+      .section-header {
+        font-family: var(--serif);
+        font-size: 1.35rem;
+        font-weight: 600;
+        margin-bottom: 18px;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+      }
+      .weather-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+        gap: 18px;
+      }
+      .weather-card {
+        background-color: var(--ink-2);
+        border-radius: var(--radius);
+        padding: 20px;
+        display: flex;
+        flex-direction: column;
+        gap: 14px;
+        border: 1px solid var(--border-color);
+        transition:
+          transform 0.18s ease,
+          border-color 0.18s ease;
+      }
+      .weather-card:hover {
+        transform: translateY(-3px);
+        border-color: var(--saffron);
+      }
+      .wc-city {
+        font-weight: 600;
+        font-size: 1.05rem;
+      }
+      .wc-icon {
+        font-size: 2.6rem;
+        color: var(--terracotta);
+      }
+      .wc-main {
+        display: flex;
+        align-items: center;
+        gap: 14px;
+      }
+      .wc-temp {
+        font-family: var(--mono);
+        font-size: 2.1rem;
+        font-weight: 600;
+      }
+      .wc-condition {
+        color: var(--text-secondary);
+        font-size: 0.92rem;
+        text-transform: capitalize;
+      }
+      .wc-details {
+        display: flex;
+        justify-content: space-between;
+        margin-top: 6px;
+        padding-top: 12px;
+        border-top: 1px solid var(--border-color);
+        color: var(--text-secondary);
+        font-size: 0.84rem;
+        font-family: var(--mono);
+      }
+      .wc-detail-item {
+        display: flex;
+        align-items: center;
+        gap: 5px;
+      }
+
+      .featured-fact-card {
+        background-color: var(--ink-2);
+        border-radius: var(--radius);
+        overflow: hidden;
+        border: 1px solid var(--border-color);
+        max-width: 640px;
+      }
+      .fact-image-placeholder {
+        height: 140px;
+        background: linear-gradient(135deg, var(--ink), var(--terracotta));
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: rgba(255, 255, 255, 0.35);
+        font-size: 2.6rem;
+      }
+      .fact-content {
+        padding: 22px;
+      }
+      .fact-title {
+        font-family: var(--serif);
+        font-size: 1.15rem;
+        font-weight: 600;
+        margin-bottom: 8px;
+      }
+      .fact-text {
+        color: var(--text-secondary);
+        line-height: 1.6;
+        font-size: 0.92rem;
+      }
+      .fact-link {
+        color: var(--saffron);
+        font-weight: 600;
+        cursor: pointer;
+        font-size: 0.88rem;
+        margin-top: 14px;
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+      }
+
+      .history-list {
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+        max-width: 720px;
+      }
+      .history-entry {
+        background-color: var(--ink-2);
+        border: 1px solid var(--border-color);
+        border-radius: 10px;
+        padding: 14px 16px;
+        cursor: pointer;
+      }
+      .history-entry:hover {
+        border-color: var(--saffron);
+      }
+      .history-entry-q {
+        font-weight: 600;
+        margin-bottom: 4px;
+      }
+      .history-entry-time {
+        font-size: 0.78rem;
+        color: var(--text-secondary);
+        font-family: var(--mono);
+      }
+
+      /* =========================================================
+         FOOTER / INPUT
+      ========================================================= */
+      .footer-area {
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+        padding-top: 16px;
+      }
+      .quick-actions {
+        display: flex;
+        gap: 10px;
+      }
+      .quick-btn {
+        flex: 1;
+        background-color: var(--ink-2);
+        color: var(--text-secondary);
+        border: 1px solid var(--border-color);
+        padding: 9px;
+        border-radius: 9px;
+        cursor: pointer;
+        font-size: 0.85rem;
+        font-weight: 500;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        gap: 7px;
+        transition: all 0.18s ease;
+      }
+      .quick-btn:hover {
+        border-color: var(--saffron);
+        color: var(--text-primary);
+      }
+      .input-container {
+        display: flex;
+        gap: 10px;
+        background-color: var(--ink-2);
+        padding: 6px 6px 6px 8px;
+        border-radius: 14px;
+        border: 1px solid var(--border-color);
+        position: relative;
+      }
+      .input-container::before {
+        content: "";
+        position: absolute;
+        top: -6px;
+        left: 14px;
+        right: 14px;
+        height: 4px;
+        background-image: repeating-linear-gradient(
+          -45deg,
+          var(--saffron) 0px,
+          var(--saffron) 5px,
+          var(--terracotta) 5px,
+          var(--terracotta) 10px
+        );
+        border-radius: 2px;
+      }
+      #user-input {
+        flex: 1;
+        background: none;
+        border: none;
+        color: var(--text-primary);
+        padding: 10px 12px;
+        font-size: 0.96rem;
+        outline: none;
+        font-family: var(--sans);
+      }
+      #user-input::placeholder {
+        color: var(--text-secondary);
+      }
+      #send-btn {
+        background: linear-gradient(135deg, var(--terracotta), var(--saffron));
+        color: var(--ink);
+        border: none;
+        padding: 10px 22px;
+        border-radius: 10px;
+        cursor: pointer;
+        font-weight: 700;
+        font-size: 0.95rem;
+        display: flex;
+        align-items: center;
+        gap: 7px;
+      }
+      #send-btn:hover {
+        filter: brightness(1.08);
+      }
+      .footer-credit {
+        text-align: center;
+        color: var(--text-secondary);
+        font-size: 0.75rem;
+        font-family: var(--mono);
+      }
+
+      /* =========================================================
+         AUTH MODAL
+      ========================================================= */
+      .modal-overlay {
+        position: fixed;
+        inset: 0;
+        background: rgba(10, 12, 26, 0.6);
+        display: none;
+        align-items: center;
+        justify-content: center;
+        z-index: 100;
+      }
+      .modal-overlay.open {
+        display: flex;
+      }
+      .modal-box {
+        background-color: var(--ink-2);
+        border: 1px solid var(--border-color);
+        border-radius: 16px;
+        width: 100%;
+        max-width: 360px;
+        padding: 26px;
+        position: relative;
+      }
+      .modal-box::before {
+        content: "";
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 5px;
+        border-radius: 16px 16px 0 0;
+        background-image: repeating-linear-gradient(
+          -45deg,
+          var(--saffron) 0px,
+          var(--saffron) 6px,
+          var(--terracotta) 6px,
+          var(--terracotta) 12px
+        );
+      }
+      .modal-title {
+        font-family: var(--serif);
+        font-weight: 600;
+        font-size: 1.3rem;
+        margin: 8px 0 16px;
+      }
+      .modal-box input {
+        width: 100%;
+        padding: 11px 13px;
+        margin-bottom: 12px;
+        border-radius: 9px;
+        border: 1px solid var(--border-color);
+        background-color: var(--ink);
+        color: var(--text-primary);
+        outline: none;
+        font-family: var(--sans);
+      }
+      .modal-box input:focus {
+        border-color: var(--saffron);
+      }
+      .modal-box select {
+        width: 100%;
+        padding: 11px 13px;
+        margin-bottom: 12px;
+        border-radius: 9px;
+        border: 1px solid var(--border-color);
+        background-color: var(--ink);
+        color: var(--text-primary);
+        outline: none;
+        font-family: var(--sans);
+        font-size: 0.92rem;
+      }
+      .modal-box select:focus {
+        border-color: var(--saffron);
+      }
+      .modal-row {
+        display: flex;
+        gap: 10px;
+        margin-bottom: 0;
+      }
+      .modal-row input {
+        margin-bottom: 12px;
+      }
+      .signup-only-field {
+        display: none;
+      }
+      .modal-box.mode-signup .signup-only-field {
+        display: block;
+      }
+      .modal-box.mode-signup .modal-row.signup-only-field {
+        display: flex;
+      }
+      .modal-box.mode-signup {
+        max-width: 380px;
+      }
+      .modal-actions {
+        margin-top: 4px;
+      }
+      .modal-btn-primary {
+        width: 100%;
+        background: linear-gradient(135deg, var(--terracotta), var(--saffron));
+        color: var(--ink);
+        border: none;
+        padding: 11px;
+        border-radius: 9px;
+        font-weight: 700;
+        cursor: pointer;
+      }
+      .modal-switch {
+        text-align: center;
+        font-size: 0.85rem;
+        color: var(--text-secondary);
+        margin-top: 14px;
+        cursor: pointer;
+      }
+      .modal-switch span {
+        color: var(--saffron);
+        font-weight: 600;
+      }
+      .modal-error {
+        color: var(--danger);
+        font-size: 0.83rem;
+        margin-bottom: 10px;
+        min-height: 16px;
+      }
+      .modal-close {
+        position: absolute;
+        top: 16px;
+        right: 18px;
+        cursor: pointer;
+        color: var(--text-secondary);
+        font-size: 1.2rem;
+      }
+    </style>
+  </head>
+  <body>
+    <!-- SIDEBAR NAV -->
+    <aside class="sidebar">
+      <div class="sidebar-logo"><i class="ph-fill ph-compass"></i></div>
+      <div class="nav-item active" id="chat-tab">
+        <i class="ph-fill ph-chat-circle-text"></i><span>Chat</span>
+      </div>
+      <div class="nav-item" id="weather-tab">
+        <i class="ph-fill ph-cloud-sun"></i><span>Weather</span>
+      </div>
+      <div class="nav-item" id="history-tab">
+        <i class="ph-fill ph-bank"></i><span>Stories</span>
+      </div>
+      <div class="nav-item" id="account-history-tab">
+        <i class="ph-fill ph-clock-counter-clockwise"></i><span>My Chats</span>
+      </div>
+      <div class="sidebar-bottom">
+        <button class="theme-toggle" id="theme-toggle-btn" title="Toggle theme">
+          <i class="ph-fill ph-moon" id="theme-icon"></i>
+        </button>
+      </div>
+    </aside>
+
+    <div class="app-shell">
+      <div class="scallop"></div>
+      <header class="topbar">
+        <div>
+          <div class="topbar-title">PTAI Assistant PK</div>
+          <div class="topbar-sub">
+            Your AI guide to Pakistan's roads, weather & history
+          </div>
+        </div>
+        <div class="topbar-right">
+          <div class="status-pill">
+            <div class="status-dot"></div>
+            Online
+          </div>
+          <div class="account-area">
+            <button class="account-btn" id="account-btn">
+              <i class="ph-fill ph-user-circle"></i>
+              <span id="account-label">Sign in</span>
+            </button>
+            <div class="account-menu" id="account-menu">
+              <div class="account-menu-item" id="menu-history-item">
+                <i class="ph-bold ph-clock-counter-clockwise"></i> My History
+              </div>
+              <div class="account-menu-item" id="menu-logout-item">
+                <i class="ph-bold ph-sign-out"></i> Log out
+              </div>
+            </div>
+          </div>
+        </div>
+      </header>
+
+      <main class="main-container">
+        <div id="chat-section">
+          <div class="welcome-box" id="welcome-box">
+            <div class="welcome-header">
+              <i class="ph-fill ph-hand-waving"></i> Khush Aamdeed!
+            </div>
+            <p class="welcome-sub">
+              Ask me about weather, safety, history, or plan a trip anywhere in
+              Pakistan.
+            </p>
+            <div class="capabilities-list">
+              <div class="capability-item">
+                <i class="ph-bold ph-check-circle"></i> Live weather conditions
+              </div>
+              <div class="capability-item">
+                <i class="ph-bold ph-check-circle"></i> Safety information
+              </div>
+              <div class="capability-item">
+                <i class="ph-bold ph-check-circle"></i> Historical context
+              </div>
+              <div class="capability-item">
+                <i class="ph-bold ph-check-circle"></i> Trip planning
+              </div>
+            </div>
+          </div>
+          <div class="chat-history" id="chat-box"></div>
+          <div class="typing-indicator" id="typing-indicator">
+            PTAI Assistant is typing...
+          </div>
+        </div>
+
+        <div id="weather-section" class="dashboard-container section-hidden">
+          <div class="section-header">
+            <i class="ph-fill ph-cloud-sun"></i> Major Cities Weather
+          </div>
+          <div
+            id="weather-loading"
+            style="color: var(--text-secondary); font-style: italic"
+          >
+            Loading live weather data...
+          </div>
+          <div class="weather-grid" id="weather-grid"></div>
+          <p
+            style="
+              margin-top: 18px;
+              color: var(--text-secondary);
+              font-size: 0.88rem;
+            "
+          >
+            Ask in chat for other specific cities.
+          </p>
+        </div>
+
+        <div id="history-section" class="dashboard-container section-hidden">
+          <div class="section-header">
+            <i class="ph-fill ph-bank"></i> Historical Spotlight
+          </div>
+          <div class="featured-fact-card">
+            <div class="fact-image-placeholder">
+              <i class="ph-fill ph-image"></i>
+            </div>
+            <div class="fact-content">
+              <div class="fact-title">Did you know: Mohenjo-daro</div>
+              <p class="fact-text">
+                Built around 2500 BCE, Mohenjo-daro was one of the largest
+                settlements of the ancient Indus Valley Civilisation. It had
+                advanced urban planning with a grid system and sophisticated
+                drainage, predating modern systems by millennia.
+              </p>
+              <div
+                class="fact-link"
+                onclick="
+                  sendQuickMessage(
+                    'Tell me more about Mohenjo-daro architecture',
+                  )
+                "
+              >
+                Tell me more in chat <i class="ph-bold ph-arrow-right"></i>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div
+          id="account-history-section"
+          class="dashboard-container section-hidden"
+        >
+          <div class="section-header">
+            <i class="ph-fill ph-clock-counter-clockwise"></i> My Chat History
+          </div>
+          <div
+            id="account-history-status"
+            style="
+              color: var(--text-secondary);
+              font-style: italic;
+              margin-bottom: 15px;
+            "
+          >
+            Sign in to see your saved conversations.
+          </div>
+          <div class="history-list" id="account-history-list"></div>
+        </div>
+
+        <footer class="footer-area">
+          <section class="quick-actions">
+            <button
+              class="quick-btn"
+              onclick="sendQuickMessage('Safety advice for tourists?')"
+            >
+              <i class="ph-fill ph-shield-check"></i> Safety
+            </button>
+            <button
+              class="quick-btn"
+              onclick="sendQuickMessage('Weather in Hunza?')"
+            >
+              <i class="ph-fill ph-sun"></i> Weather
+            </button>
+            <button
+              class="quick-btn"
+              onclick="sendQuickMessage('History of Badshahi Mosque?')"
+            >
+              <i class="ph-fill ph-book-bookmark"></i> History
+            </button>
+            <button
+              class="quick-btn"
+              onclick="sendQuickMessage('Plan a 3-day Lahore trip')"
+            >
+              <i class="ph-fill ph-map-trifold"></i> Plan
+            </button>
+          </section>
+          <div class="input-container">
+            <input
+              type="text"
+              id="user-input"
+              placeholder="Ask anything about Pakistan..."
+              autocomplete="off"
+            />
+            <button id="send-btn">
+              <i class="ph-fill ph-paper-plane-tilt"></i> Send
+            </button>
+          </div>
+          <div class="footer-credit">
+            Powered by Riazzudin • PTAI Initiative 2024
+          </div>
+        </footer>
+      </main>
+    </div>
+
+    <!-- AUTH MODAL -->
+    <div class="modal-overlay" id="auth-modal">
+      <div class="modal-box" id="modal-box-el">
+        <i class="ph-bold ph-x modal-close" id="modal-close-btn"></i>
+        <div class="modal-title" id="modal-title">Sign In</div>
+        <div class="modal-error" id="modal-error"></div>
+
+        <!-- Signup-only fields -->
+        <input
+          type="text"
+          id="auth-fullname"
+          class="signup-only-field"
+          placeholder="Full name"
+          autocomplete="name"
+        />
+        <input
+          type="email"
+          id="auth-email"
+          class="signup-only-field"
+          placeholder="Email address"
+          autocomplete="email"
+        />
+        <select id="auth-gender" class="signup-only-field">
+          <option value="" disabled selected>Gender</option>
+          <option value="Male">Male</option>
+          <option value="Female">Female</option>
+          <option value="Other">Other</option>
+          <option value="Prefer not to say">Prefer not to say</option>
+        </select>
+        <div class="modal-row signup-only-field">
+          <input
+            type="number"
+            id="auth-age"
+            placeholder="Age (optional)"
+            min="13"
+            max="120"
+          />
+          <input
+            type="text"
+            id="auth-country"
+            placeholder="Country (optional)"
+            autocomplete="country-name"
+          />
+        </div>
+
+        <!-- Shared fields -->
+        <input
+          type="text"
+          id="auth-username"
+          placeholder="Username"
+          autocomplete="username"
+        />
+        <input
+          type="password"
+          id="auth-password"
+          placeholder="Password"
+          autocomplete="current-password"
+        />
+        <div class="modal-actions">
+          <button class="modal-btn-primary" id="modal-submit-btn">
+            Sign In
+          </button>
+        </div>
+        <div class="modal-switch" id="modal-switch-text">
+          Don't have an account? <span>Sign up</span>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      /* THEME */
+      const themeToggleBtn = document.getElementById("theme-toggle-btn");
+      const themeIcon = document.getElementById("theme-icon");
+      function applyTheme(theme) {
+        document.documentElement.setAttribute("data-theme", theme);
+        themeIcon.className =
+          theme === "light" ? "ph-fill ph-sun" : "ph-fill ph-moon";
+        localStorage.setItem("ptai-theme", theme);
+      }
+      function initTheme() {
+        const saved = localStorage.getItem("ptai-theme");
+        const prefersLight = window.matchMedia(
+          "(prefers-color-scheme: light)",
+        ).matches;
+        applyTheme(saved || (prefersLight ? "light" : "dark"));
+      }
+      themeToggleBtn.addEventListener("click", () => {
+        const current = document.documentElement.getAttribute("data-theme");
+        applyTheme(current === "light" ? "dark" : "light");
+      });
+      initTheme();
+
+      /* AUTH */
+      let currentUser = null;
+      let authMode = "login";
+      const authModal = document.getElementById("auth-modal");
+      const accountBtn = document.getElementById("account-btn");
+      const accountLabel = document.getElementById("account-label");
+      const accountMenu = document.getElementById("account-menu");
+      const modalTitle = document.getElementById("modal-title");
+      const modalSubmitBtn = document.getElementById("modal-submit-btn");
+      const modalSwitchText = document.getElementById("modal-switch-text");
+      const modalError = document.getElementById("modal-error");
+
+      const modalBoxEl = document.getElementById("modal-box-el");
+
+      function openAuthModal(mode) {
+        authMode = mode;
+        modalError.textContent = "";
+        document.getElementById("auth-username").value = "";
+        document.getElementById("auth-password").value = "";
+        document.getElementById("auth-fullname").value = "";
+        document.getElementById("auth-email").value = "";
+        document.getElementById("auth-gender").value = "";
+        document.getElementById("auth-age").value = "";
+        document.getElementById("auth-country").value = "";
+        if (mode === "login") {
+          modalTitle.textContent = "Sign In";
+          modalSubmitBtn.textContent = "Sign In";
+          modalSwitchText.innerHTML =
+            "Don't have an account? <span>Sign up</span>";
+          modalBoxEl.classList.remove("mode-signup");
+        } else {
+          modalTitle.textContent = "Create Account";
+          modalSubmitBtn.textContent = "Sign Up";
+          modalSwitchText.innerHTML =
+            "Already have an account? <span>Sign in</span>";
+          modalBoxEl.classList.add("mode-signup");
+        }
+        authModal.classList.add("open");
+      }
+      function closeAuthModal() {
+        authModal.classList.remove("open");
+      }
+      document
+        .getElementById("modal-close-btn")
+        .addEventListener("click", closeAuthModal);
+      modalSwitchText.addEventListener("click", () =>
+        openAuthModal(authMode === "login" ? "signup" : "login"),
+      );
+
+      accountBtn.addEventListener("click", () => {
+        if (!currentUser) openAuthModal("login");
+        else accountMenu.classList.toggle("open");
+      });
+      document.addEventListener("click", (e) => {
+        if (!accountBtn.contains(e.target) && !accountMenu.contains(e.target)) {
+          accountMenu.classList.remove("open");
+        }
+      });
+
+      modalSubmitBtn.addEventListener("click", async () => {
+        const username = document.getElementById("auth-username").value.trim();
+        const password = document.getElementById("auth-password").value;
+        if (!username || !password) {
+          modalError.textContent = "Please fill in both fields.";
+          return;
+        }
+
+        const payload = { username, password };
+        if (authMode === "signup") {
+          const fullName = document
+            .getElementById("auth-fullname")
+            .value.trim();
+          const email = document.getElementById("auth-email").value.trim();
+          const gender = document.getElementById("auth-gender").value;
+          const age = document.getElementById("auth-age").value;
+          const country = document.getElementById("auth-country").value.trim();
+          if (!fullName) {
+            modalError.textContent = "Please enter your full name.";
+            return;
+          }
+          if (!email) {
+            modalError.textContent = "Please enter your email.";
+            return;
+          }
+          if (!gender) {
+            modalError.textContent = "Please select a gender option.";
+            return;
+          }
+          payload.full_name = fullName;
+          payload.email = email;
+          payload.gender = gender;
+          payload.age = age;
+          payload.country = country;
+        }
+
+        const endpoint = authMode === "login" ? "/login" : "/signup";
+        try {
+          const res = await fetch(endpoint, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(payload),
+          });
+          const data = await res.json();
+          if (!res.ok) {
+            modalError.textContent = data.error || "Something went wrong.";
+            return;
+          }
+          currentUser = data.user;
+          accountLabel.textContent = currentUser.username;
+          closeAuthModal();
+          await loadAccountHistory();
+        } catch (err) {
+          modalError.textContent = "Connection error.";
+        }
+      });
+
+      document
+        .getElementById("menu-logout-item")
+        .addEventListener("click", async () => {
+          await fetch("/logout", { method: "POST" });
+          currentUser = null;
+          accountLabel.textContent = "Sign in";
+          accountMenu.classList.remove("open");
+          document.getElementById("account-history-list").innerHTML = "";
+          document.getElementById("account-history-status").textContent =
+            "Sign in to see your saved conversations.";
+          chatBox.innerHTML = "";
+          welcomeBox.style.display = "block";
+          firstMessageSent = false;
+        });
+      document
+        .getElementById("menu-history-item")
+        .addEventListener("click", () => {
+          accountMenu.classList.remove("open");
+          switchTab("account-history-tab");
+        });
+
+      async function checkSession() {
+        try {
+          const res = await fetch("/session");
+          const data = await res.json();
+          if (data.logged_in) {
+            currentUser = data.user;
+            accountLabel.textContent = currentUser.username;
+            await loadAccountHistory();
+          }
+        } catch (e) {}
+      }
+
+      async function loadAccountHistory() {
+        const statusEl = document.getElementById("account-history-status");
+        const listEl = document.getElementById("account-history-list");
+        if (!currentUser) {
+          statusEl.textContent = "Sign in to see your saved conversations.";
+          listEl.innerHTML = "";
+          return;
+        }
+        statusEl.textContent = "Loading your history...";
+        try {
+          const res = await fetch("/get_history");
+          const data = await res.json();
+          listEl.innerHTML = "";
+          if (!data.history || data.history.length === 0) {
+            statusEl.textContent =
+              "No saved conversations yet — start chatting!";
+            return;
+          }
+          statusEl.textContent = "";
+          data.history.forEach((entry) => {
+            const div = document.createElement("div");
+            div.className = "history-entry";
+            div.innerHTML = `<div class="history-entry-q">${entry.message}</div><div class="history-entry-time">${entry.timestamp}</div>`;
+            div.addEventListener("click", () => {
+              switchTab("chat-tab");
+              appendMessage(entry.message, "user");
+              appendMessage(entry.response, "bot");
+            });
+            listEl.appendChild(div);
+          });
+        } catch (e) {
+          statusEl.textContent = "Could not load history.";
+        }
+      }
+
+      /* CHAT */
+      const chatBox = document.getElementById("chat-box");
+      const userInput = document.getElementById("user-input");
+      const sendBtn = document.getElementById("send-btn");
+      const typingIndicator = document.getElementById("typing-indicator");
+      const welcomeBox = document.getElementById("welcome-box");
+      let firstMessageSent = false;
+
+      function appendMessage(text, sender) {
+        if (!firstMessageSent) {
+          welcomeBox.style.display = "none";
+          firstMessageSent = true;
+        }
+
+        const msgDiv = document.createElement("div");
+        msgDiv.className = `message ${sender === "user" ? "user-message" : "bot-message"}`;
+
+        if (sender === "bot") {
+          msgDiv.innerHTML = marked.parse(text);
+        } else {
+          msgDiv.textContent = text;
+        }
+
+        chatBox.appendChild(msgDiv);
+        chatBox.scrollTop = chatBox.scrollHeight;
+      }
+
+      async function sendMessage(messageText = null) {
+        const text = messageText || userInput.value.trim();
+        if (text === "") return;
+        if (
+          document
+            .getElementById("chat-section")
+            .classList.contains("section-hidden")
+        )
+          switchTab("chat-tab");
+        appendMessage(text, "user");
+        userInput.value = "";
+        userInput.focus();
+        typingIndicator.style.display = "block";
+        chatBox.scrollTop = chatBox.scrollHeight;
+        try {
+          const response = await fetch("/chat", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ message: text }),
+          });
+          const data = await response.json();
+          typingIndicator.style.display = "none";
+          appendMessage(data.response, "bot");
+          if (currentUser) loadAccountHistory();
+        } catch (error) {
+          typingIndicator.style.display = "none";
+          appendMessage("Connection Error.", "bot");
+        }
+      }
+      function sendQuickMessage(text) {
+        sendMessage(text);
+      }
+      sendBtn.addEventListener("click", () => sendMessage());
+      userInput.addEventListener("keypress", (e) => {
+        if (e.key === "Enter") sendMessage();
+      });
+
+      /* TABS */
+      const tabs = document.querySelectorAll(".nav-item");
+      const sections = {
+        "chat-tab": document.getElementById("chat-section"),
+        "weather-tab": document.getElementById("weather-section"),
+        "history-tab": document.getElementById("history-section"),
+        "account-history-tab": document.getElementById(
+          "account-history-section",
+        ),
+      };
+      function switchTab(clickedTabId) {
+        tabs.forEach((tab) => tab.classList.remove("active"));
+        document.getElementById(clickedTabId).classList.add("active");
+        Object.values(sections).forEach((section) =>
+          section.classList.add("section-hidden"),
+        );
+        sections[clickedTabId].classList.remove("section-hidden");
+        if (clickedTabId === "account-history-tab") loadAccountHistory();
+      }
+      tabs.forEach((tab) =>
+        tab.addEventListener("click", (e) => switchTab(e.currentTarget.id)),
+      );
+
+      const weatherGrid = document.getElementById("weather-grid");
+      const weatherLoading = document.getElementById("weather-loading");
+      async function loadDashboardWeather() {
+        try {
+          const response = await fetch("/get_dashboard_weather");
+          const data = await response.json();
+          weatherLoading.style.display = "none";
+          data.forEach((cityData) => {
+            const cardHtml = `
+                        <div class="weather-card">
+                            <div class="wc-city">${cityData.location}</div>
+                            <div class="wc-main">
+                                <i class="ph-fill ${cityData.icon} wc-icon"></i>
+                                <div><div class="wc-temp">${cityData.temperature}°C</div><div class="wc-condition">${cityData.description}</div></div>
+                            </div>
+                            <div class="wc-details">
+                                <div class="wc-detail-item"><i class="ph-bold ph-drop"></i> ${cityData.humidity}%</div>
+                                <div class="wc-detail-item"><i class="ph-bold ph-wind"></i> ${cityData.wind} m/s</div>
+                            </div>
+                        </div>`;
+            weatherGrid.innerHTML += cardHtml;
+          });
+        } catch (e) {
+          weatherLoading.innerText =
+            "Error loading weather data. Check connection.";
+        }
+      }
+
+      loadDashboardWeather();
+      checkSession();
+    </script>
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+  </body>
+</html>
